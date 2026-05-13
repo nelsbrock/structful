@@ -13,6 +13,7 @@ pub fn derive_structful_get(input: TokenStream) -> TokenStream {
     get::derive(input).into()
 }
 
+#[proc_macro_error]
 #[proc_macro_derive(StructfulPut, attributes(structful))]
 pub fn derive_structful_put(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);

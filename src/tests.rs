@@ -11,7 +11,8 @@ struct Wow(u8, u8);
 struct Person {
     name: String,
     age: u8,
-    #[structful(recursive)]
+    #[structful(leaf)]
+    aha: u16,
     wow: Wow,
 }
 
@@ -20,6 +21,7 @@ fn test() {
     let person = Person {
         name: "Niklas".into(),
         age: 24,
+        aha: 3,
         wow: Wow(45, 67),
     };
 

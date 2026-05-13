@@ -12,16 +12,18 @@ fn match_arms<'a>(fields: impl Iterator<Item = FieldWithId<'a>>) -> Vec<TokenStr
             let id_str = id.to_string();
             let config = FieldAttrsConfig::parse_from_attrs(&field_decl.field.attrs);
 
-            if config.recursive {
+            if config.leaf {
                 quote! {
                     Some(#id_str) => {
-                        structful::StructfulGet::structful_get(&self.#id, path, serializer)
+                        serde::Serialize::serialize(&self.#id, serializer).map_err(
+                            structful::Error::<S::Error>::from
+                        )
                     }
                 }
             } else {
                 quote! {
                     Some(#id_str) => {
-                        serde::Serialize::serialize(&self.#id, serializer).map_err(|err| err.into())
+                        structful::StructfulGet::structful_get(&self.#id, path, serializer)
                     }
                 }
             }
@@ -66,7 +68,9 @@ fn derive_struct(name: Ident, data: &syn::DataStruct) -> TokenStream {
                 S: Serializer,
             {
                 match path.next() {
-                    None => self.serialize(serializer).map_err(|err| err.into()),
+                    None => self.serialize(serializer).map_err(
+                        structful::Error::<S::Error>::from
+                    ),
                     #(#match_arms),*,
                     Some(invalid) => Err(structful::Error::invalid_path(
                         invalid,
